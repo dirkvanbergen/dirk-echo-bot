@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
@@ -13,7 +15,23 @@ namespace Microsoft.BotBuilderSamples.Bots
     {
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
-            var replyText = $"Echo: {turnContext.Activity.Text}";
+            var userInfo = turnContext.Activity.Entities?.FirstOrDefault(entity => entity.Type.Equals("UserInfo", StringComparison.Ordinal));
+            var replyText = "";
+            if (userInfo != null)
+            {
+                var email = userInfo.Properties.Value<string>("UserEmail");
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    //Do something with the user's email address.
+                }
+
+                replyText = $"Hoi {email}, you said: {turnContext.Activity.Text}";
+            }
+            else
+            {
+                replyText = $"I don't know who you are but you said: {turnContext.Activity.Text}";
+            }
             await turnContext.SendActivityAsync(MessageFactory.Text(replyText, replyText), cancellationToken);
         }
 
